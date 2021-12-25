@@ -10,7 +10,7 @@ public class Bericht {
 	int tijd;
 	ArrayList<ETA> ETAs;
 	
-	Bericht(String lijnNaam, String bedrijf, String busID, int tijd){
+	Bericht(String lijnNaam, String bedrijf, String busID, int tijd) {
 		this.lijnNaam=lijnNaam;
 		this.bedrijf=bedrijf;
 		this.eindpunt="";

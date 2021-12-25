@@ -3,8 +3,9 @@ package hanze.nl.bussimulator;
 import com.thoughtworks.xstream.XStream;
 import hanze.nl.bussimulator.Halte.Positie;
 
-public class Bus{
+import java.util.ArrayList;
 
+public class Bus{
 	private Bedrijven bedrijf;
 	private Lijnen lijn;
 	private int halteNummer;
@@ -21,6 +22,18 @@ public class Bus{
 		this.totVolgendeHalte = 0;
 		this.bijHalte = false;
 		this.busID = "Niet gestart";
+	}
+
+	public Lijnen getLijn() {
+		return this.lijn;
+	}
+
+	public Bedrijven getBedrijf() {
+		return this.bedrijf;
+	}
+
+	public String getBusID() {
+		return this.busID;
 	}
 	
 	public void setbusID(int starttijd){
@@ -69,41 +82,32 @@ public class Bus{
 		}
 		return eindpuntBereikt;
 	}
-	
-	public void sendETAs(int nu){
-		int i=0;
-		Bericht bericht = new Bericht(lijn.name(),bedrijf.name(),busID,nu);
-		if (bijHalte) {
-			ETA eta = new ETA(lijn.getHalte(halteNummer).name(),lijn.getRichting(halteNummer),0);
-			bericht.ETAs.add(eta);
-		}
+
+	// This function does not belong here.
+	// Due to time reasons this was not resolved.
+	public ArrayList<ETA> getETAs(int tijd) {
+		ArrayList<ETA> etaArrayList = new ArrayList<ETA>();
+
+		if (this.bijHalte)
+			etaArrayList.add(new ETA(
+					this.lijn.getHalte(this.halteNummer).name(),
+					this.lijn.getRichting(this.halteNummer),
+					0
+			));
+
 		Positie eerstVolgende=lijn.getHalte(halteNummer+richting).getPositie();
-		int tijdNaarHalte=totVolgendeHalte+nu;
-		for (i = halteNummer+richting ; !(i>=lijn.getLengte()) && !(i < 0); i=i+richting ){
-			tijdNaarHalte+= lijn.getHalte(i).afstand(eerstVolgende);
-			ETA eta = new ETA(lijn.getHalte(i).name(), lijn.getRichting(i),tijdNaarHalte);
-			bericht.ETAs.add(eta);
+		int tijdNaarHalte=totVolgendeHalte+tijd;
+		for (int i = halteNummer+richting ; !(i>=lijn.getLengte()) && !(i < 0); i=i+richting ){
+			tijdNaarHalte += lijn.getHalte(i).afstand(eerstVolgende);
+			etaArrayList.add(new ETA(
+					lijn.getHalte(i).name(),
+					lijn.getRichting(i),
+					tijdNaarHalte
+			));
+
 			eerstVolgende=lijn.getHalte(i).getPositie();
 		}
-		bericht.eindpunt=lijn.getHalte(i-richting).name();
-		sendBericht(bericht);
-	}
-	
-	public void sendLastETA(int nu){
-		Bericht bericht = new Bericht(lijn.name(),bedrijf.name(),busID,nu);
-		String eindpunt = lijn.getHalte(halteNummer).name();
-		ETA eta = new ETA(eindpunt,lijn.getRichting(halteNummer),0);
-		bericht.ETAs.add(eta);
-		bericht.eindpunt = eindpunt;
-		sendBericht(bericht);
-	}
 
-	public void sendBericht(Bericht bericht){
-    	XStream xstream = new XStream();
-    	xstream.alias("Bericht", Bericht.class);
-    	xstream.alias("ETA", ETA.class);
-    	String xml = xstream.toXML(bericht);
-    	Producer producer = new Producer();
-    	producer.sendBericht(xml);		
+		return etaArrayList;
 	}
 }
