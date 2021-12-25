@@ -28,7 +28,8 @@ public class Runner {
 		busStart.remove(tijd);
 		return (!busStart.isEmpty()) ? Collections.min(busStart.keySet()) : -1;
 	}
-	
+
+	// Due to bad ETA system this is W A Y bigger than should be.
 	public static void moveBussen(int nu){
 		BusFormatter busFormatter = new BusFormatter(nu);
 		Producer     busProducer  = new Producer();
